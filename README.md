@@ -20,7 +20,7 @@ This is an implementation of NSCache and AFCache that transparently handles imag
 //Do this in your app delegate, or before the first request is made...
 [UIImageView setSharedImageCache:[NPBImageCache sharedInstance]];
 
-//Make the request as usual.
+//Use AFNetworking to load the image from the URL as usual...
 UIImageView *imageView = ....
 [imageView setImageWithURL:url placeholderImage:nil];
 
@@ -29,3 +29,27 @@ NSString *urlString = @"http://www.server.com/image123";
 [[NPBImageCache sharedInstance] clearCachedItemForURL: urlString];
 
 ```
+It should also work in Swift.
+
+The cache attempts to load an image for a particular URL from memory. If that image is not present,
+it checks a folder in the temporary directory for the image. If that also fails, it returns nil
+and the image is loaded over the network.
+
+As memory pressure forces the cache to evict objects, it writes them to the temporary directory
+to be possibly loaded later.
+
+By default, the temporary directory is allowed to grow to 100MB, after which the entire directory
+is purged.
+
+To purge the directory yourself, call:
+```objective-c
+[[NPBImageCache sharedInstance] clearCacheDirectory];
+```
+
+You can also change the disk usage limit:
+```objective-c
+int sizeInBytes = 250 * 1024 * 1000;
+[[NPBImageCache sharedInstance] setMaximumDiskUsage: sizeInBytes];
+```
+
+However, after you change maximum disk usage value, the temporary directory is cleared.
